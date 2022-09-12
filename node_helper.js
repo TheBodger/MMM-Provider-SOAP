@@ -27,6 +27,9 @@ var NodeHelper = require("node_helper");
 var moment = require("moment");
 var fs = require('fs');
 
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+var xhr = new XMLHttpRequest();
+
 //pseudo structures for commonality across all modules
 //obtained from a helper file of modules
 
@@ -111,7 +114,7 @@ module.exports = NodeHelper.create({
 
 		if (tempconfig.package != null) {
 			//try and read a file and merge its contents with the deepcopy
-			var packagename = 'modules/MMM-Provider-JSON/packages/' + tempconfig.package + '.js';
+			var packagename = 'modules/MMM-Provider-SOAP/SOAPpackages/' + tempconfig.package + '.js';
 			try {
 				eval(fs.readFileSync(packagename) + '');
 				Object.assign(tempconfig, package); //merge

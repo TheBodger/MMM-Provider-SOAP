@@ -20,10 +20,12 @@ Example of MMM-Provider-SOAP output being displayed through the MMM-Consumer-???
 This module requires both MMM-FeedUtilities and MMM-ChartUtilies to be installed.
 
 	Before installing this module;
+
 		Install and then read README.md for https://github.com/TheBodger/MMM-ChartUtilities to setup the MMM-Chart... dependencies and  install all modules.
 		Install and then read README.md for https://github.com/TheBodger/MMM-FeedUtilities to setup the MMM-Feed... dependencies and  install all modules.
 
-		npd install moment
+npd install moment
+npd install xmlhttprequest
 
 ## Installation
 To install the module, use your terminal to:
