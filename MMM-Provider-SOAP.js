@@ -45,10 +45,13 @@ Module.register("MMM-Provider-SOAP", {
 		initialdelay: null, //milliseconds to pause the module before checking for new data the first time, see example config in readme for an example
 		datarefreshinterval: 1000 * 60 * 60 * 24,	//milliseconds to pause before checking for new data // common timer for all consumers // 
 													// adjust to ensure quota not breached on restricted aPi call limits
-		input:'URL',		// either 'URL' (default), 'provider', 'filename'
+		input:'URL',		// either 'URL' (default)
 		id: '',				// the id of this module that must be unique
+		
+		baseurl: '',		// the fixed part of the url, can include insertable values such as {apikey} that will be taken from the named variables in the config, may also include defaults such as time or date
+		basedata: '',		// the xml formatted soap request data to be sent in the post to the baseurl
+		baseheaders:'',		// any headers required to be included as a string
 		type: 'FlightArrivals',				// the type of this extracted data that will be used in the object field of the output
-		baseurl: '',		// the fixed part of the url, can include insertable values such as {apikey} that will be taken from the named variables in the config, may also include defaults such as time or date 
 		urlparams: null,	// (i.e. {apikey:'jakhsdfasdkfjh9875t-987asdgwe',something:'else'}, //TODO add dynamic URLparams
 		baseaddress: null,  // a dotnotation base entry level from which all other data addresses are defined
 		itemtype: 'array',	// how the items to process are arranged within the input
