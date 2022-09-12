@@ -1,8 +1,8 @@
 # MMM-Provider-JSON
 
-This magic mirror module is a MMM-Provider module that will extract specified data from a JSON feed and provide it to any requesting consumers in a defined JSON format.
+This magic mirror module is a MMM-Provider module that will extract specified data from a SOAP feed and provide it to any requesting consumers in a defined JSON format.
 
-The module can obtain data from a URL, a local file or the output from another provider providing data in well formed JSON
+The module can obtain data from a URL
 
 ## Usage
 
@@ -11,9 +11,9 @@ The module can obtain data from a URL, a local file or the output from another p
 3) Data can be sorted before being sent to the requesting consumer.
 
 ### Example
-![Example of MMM-Provider-JSON output being displayed through the MMM-Consumer-Flights module](images/screenshot.png?raw=true "Example screenshot")
+![Example of MMM-Provider-SOAP output from British Rail being displayed through the MMM-Consumer-????? module](images/screenshot.png?raw=true "Example screenshot")
 
-Example of MMM-Provider-JSON output being displayed through the MMM-Consumer-Flights module
+Example of MMM-Provider-SOAP output being displayed through the MMM-Consumer-????? module
 
 ### Dependencies
 
@@ -28,7 +28,7 @@ This module requires both MMM-FeedUtilities and MMM-ChartUtilies to be installed
 ## Installation
 To install the module, use your terminal to:
 1. Navigate to your MagicMirror's modules folder. If you are using the default installation directory, use the command:<br />`cd ~/MagicMirror/modules`
-2. Clone the module:<br />`git clone https://github.com/TheBodger/MMM-Provider-JSON`
+2. Clone the module:<br />`git clone https://github.com/TheBodger/MMM-Provider-SOAP`
 
 ## Using the module
 
@@ -37,7 +37,7 @@ To install the module, use your terminal to:
 To use this module, add the following minimum configuration block to the modules array in the `config/config.js` file:
 ```js
 {
-module: "MMM-Provider-JSON",
+module: "MMM-Provider-SOAP",
 			config: {
 				consumerids: ["consumerid",],
 				id: 'uniqueID', 
@@ -46,7 +46,7 @@ module: "MMM-Provider-JSON",
 },
 ```
 
-Check out the example.config.js file for an example of a config that will produce an input of flights arriving at a specific airport for the MMM-Consumer-Flights module
+Check out the example.config.js file for an example of a config that will produce an input of trains departing from a specific station for the MMM-Consumer-????? module
 
 ### Configuration Options
 
