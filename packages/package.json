@@ -1,0 +1,25 @@
+{
+  "name": "MMM-Provider-SOAP",
+  "version": "1.0.0",
+  "description": "Magic Mirror Module for pulling SOAP data, reformatting and passing to a main module in JSON",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheBodger/MMM-Provider-SOAP"
+  },
+  "author": {
+    "name": "N Scott"
+  },
+  "keywords": [
+    "magic mirror",
+    "smart mirror",
+    "SOAP Feeds",
+    "module",
+    "provider"
+  ],
+  "dependencies": {},
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TheBodger/MMM-Provider-SOAP/issues"
+  },
+  "homepage": "https://github.com/TheBodger/MMM-Provider-SOAP#readme"
+}
