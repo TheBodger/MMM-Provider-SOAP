@@ -1,4 +1,4 @@
-# MMM-Provider-JSON
+# MMM-Provider-SOAP
 
 This magic mirror module is a MMM-Provider module that will extract specified data from a SOAP feed and provide it to any requesting consumers in a defined JSON format.
 
