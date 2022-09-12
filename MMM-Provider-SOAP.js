@@ -50,7 +50,7 @@ Module.register("MMM-Provider-SOAP", {
 		
 		baseurl: '',		// the fixed part of the url, can include insertable values such as {apikey} that will be taken from the named variables in the config, may also include defaults such as time or date
 		basedata: '',		// the xml formatted soap request data to be sent in the post to the baseurl
-		baseheaders:'',		// any headers required to be included as a string
+		baseheaders:'',		// any headers required to be included as a list of strings 
 		type: 'FlightArrivals',				// the type of this extracted data that will be used in the object field of the output
 		urlparams: null,	// (i.e. {apikey:'jakhsdfasdkfjh9875t-987asdgwe',something:'else'}, //TODO add dynamic URLparams
 		baseaddress: null,  // a dotnotation base entry level from which all other data addresses are defined
