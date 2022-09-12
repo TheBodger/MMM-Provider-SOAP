@@ -8,7 +8,7 @@
  */
 
 
-//todo: change name of packages folder / visual studio doesn't recognise any entries
+//DONE: change name of packages folder / visual studio doesn't recognise  entries as a directory /packages is ignored within gitignore
 
 var startTime = new Date();
 
