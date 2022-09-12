@@ -27,9 +27,6 @@ var NodeHelper = require("node_helper");
 var moment = require("moment");
 var fs = require('fs');
 
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-var xhr = new XMLHttpRequest();
-
 //pseudo structures for commonality across all modules
 //obtained from a helper file of modules
 
@@ -80,21 +77,6 @@ module.exports = NodeHelper.create({
 			tempURL = tempURL.replace('{' + param + '}', config.urlparams[param]);
 		}
 
-		//if we are paginating, check the pagination variables as well
-
-		if (config.pagination) {
-
-			//offset, starts at 0, and is incremented by the value of processed for each subsequent api call
-			//count, the number of entries to poll; set through the config value, pagcount
-
-			tempURL = tempURL.replace('{count}', config.pagcount);
-			tempURL = tempURL.replace('{offset}', config.pagdetails.pagoffset);
-
-			tempURL = tempURL.replace('{countname}', config.pagcountname);
-			tempURL = tempURL.replace('{offsetname}', config.pagoffsetname);
-
-		}
-
 		if (this.debug) { console.log("API URL:", tempURL) };
 
 		return tempURL
@@ -128,18 +110,7 @@ module.exports = NodeHelper.create({
 
 		//build the input details
 
-		if (tempconfig.input != null) {
-
-			tempconfig['useHTTP'] = false;
-
-			// work out if we need to use a HTTP processor and build the url and store in the input field for compatibility 
-			// with the old code for handling JSON
-
-			if (tempconfig.input == "URL") {
-				tempconfig.useHTTP = true;
-			}
-
-		}
+		tempconfig.useHTTP = true;
 
 		//now build all the required values from the defaults if not entered in the config
 		//creating a working fields set for this instance
@@ -244,57 +215,15 @@ module.exports = NodeHelper.create({
 
 		this.outputarray = [];
 
-		//pagination and filtering
-
-		var pagdetails = {
-			paginationend: false,
-			offset: 0,
-			count: 0,
-			total: 0,
-			pagoffset: 0,
-			pagprocessed: 0,
-			pagcounter: 0, //the number of api calls
-			pagcount: 0, // total number of items downloaded // populated from a count variable or the actual number in the array of items returned
-			pagtoday: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0).getTime(),
-			pagnow: new Date(),
-			pagallprocessed: false,
-			usearraylength: true,
-		};
-
-		//if some fields are entered as '' they are converted to null to simplify testing downstream
-
-		if (!tempconfig.pagination) { pagdetails.paginationend = true; } //we force a true situation to process data after processfeed
-
-		pagdetails.usearraylength = true;
-
-		tempconfig.pagfields.forEach(function (pagfield, index) {
-
-			var fieldname = Object.keys(pagfield)[0];
-			var fieldparams = pagfield[fieldname];
-
-			tempconfig.pagfields[index]['fieldname'] = fieldname;
-
-			tempconfig.pagfields[index]['outputname'] = fieldparams.outputname;
-
-			if (fieldparams.outputname == null) {
-				tempconfig.pagfields[index]['outputname'] = fieldname;
-			}
-
-			if (tempconfig.pagfields[index].outputname == 'count') { pagdetails.usearraylength = false; }
-
-		})
-
-		if (tempconfig.pagcriteria == null) { tempconfig.pagcriteria = '%count%==%total%'; }
-
-		tempconfig['pagdetails'] = pagdetails;
-
 		//store a local copy so we dont have keep moving it about
 
 		providerstorage[moduleinstance] = { config: tempconfig,  trackingfeeddates: [] };
 
 	},
 
-	getconfig: function (moduleinstance) { return providerstorage[moduleinstance].config; },
+	getconfig: function (moduleinstance) {
+		return providerstorage[moduleinstance].config;
+	},
 
 	socketNotificationReceived: function (notification, payload) {
 
@@ -346,12 +275,19 @@ module.exports = NodeHelper.create({
 
 		if (this.debug) { this.logger[moduleinstance].info("In processfeeds: " + moduleinstance + " " + providerid); }
 
-		//if pagination is set then this module will be recursively called from processfeed
-
 		if (tempconfig.useHTTP) {
 			tempconfig.input = this.buildURL(tempconfig); //rebuilds for each call, with offset etc being updated
 			options = new URL(tempconfig.input);
 		}
+
+
+
+		//add SOAP utilities here
+		//var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+		//var xhr = new XMLHttpRequest();
+		//xhr.open("POST", url);
+		//xhr.setRequestHeader("Content-Type", "text/xml;charset=UTF-8", "SOAPAction", "http://thalesgroup.com/RTTI/2016-02-16/ldb/GetDepBoardWithDetails")//, "Accept-encoding", "gzip,x-gzip,deflate,x-bzip2")
+		//xhr.send(data);
 
 		var JSONconfig = {
 			options: options,
@@ -384,23 +320,6 @@ module.exports = NodeHelper.create({
 			else {
 				console.error("json array is empty");
 				return null;
-			}
-
-			if (JSONconfig.config.pagination) {//get the count etc details
-				var pagmeta = utilities.getkeyedJSON(inputjson, JSONconfig.config.pagbaseaddress);
-
-				JSONconfig.config.pagfields.forEach(function (pagfield) {
-
-					var dotaddress = pagfield.fieldname;
-
-					if (pagfield[pagfield.fieldname].address != null) { dotaddress = pagfield[pagfield.fieldname].address + '.' + dotaddress; }
-
-					JSONconfig.config.pagdetails[pagfield[pagfield.fieldname].outputname] = utilities.getkeyedJSON(pagmeta, dotaddress);
-
-				})
-
-				JSONconfig.config.pagdetails.pagcounter += 1; // the number of calls to the api
-
 			}
 
 			self.queue.addtoqueue(function () {
@@ -491,30 +410,6 @@ module.exports = NodeHelper.create({
 		var self = this;
 
 		var maxfeeddate = new Date(0);
-
-		//pagination - we are about to start processing the incoming entries
-		//so we count them and check at the end of each one if we have met the criteria
-		//otherwise we call processfeeds again
-
-		//if the count field variable isn't defined, then we use the number of items returned
-
-		if (config.pagdetails.usearraylength) {
-			config.pagdetails.pagcount += jsonarray.length;
-		}
-		else {
-			config.pagdetails.pagcount += config.pagdetails.count;
-		}
-
-		//if total available isnt returned from API, then use an array of 0 to indicate the end
-
-		if (config.pagdetails.total == null && jsonarray.length == 0) {
-
-			config.pagdetails.total = config.pagdetails.pagcount;
-		}
-
-		if (this.debug) {
-			console.log("second array:" + config.fields.secondaryArray);
-		}
 
 		for (var idx = 0; idx < jsonarray.length; idx++) { //initial data array loop
 
@@ -649,51 +544,38 @@ module.exports = NodeHelper.create({
 		
 		}  //end of process loop - input array  //secondary loop situation
 
-		// if paginating, and not end criteria met, we call processfeeds again
+		if (config.sorting && this.outputarray.length > 0) { //carry out multi level sort
 
-		if (config.pagination) {
-			config.pagdetails.pagoffset = config.pagdetails.pagcount;
-			config.pagdetails.paginationend = this.checkendofpagination(config, tempitem);
-		}
+			JSONutils.putJSON("./presort" + config.filename, this.outputarray);
 
-		if (!config.pagdetails.paginationend) {
-			this.processfeeds(moduleinstance, providerid);
-		}
-		else { //we are finished at the last check so we go to sorting and sending 
+			var sortutility = new utilities.mergeutils();
 
-			if (config.sorting && this.outputarray.length > 0) { //carry out multi level sort
-
-				JSONutils.putJSON("./presort" + config.filename, this.outputarray);
-
-				var sortutility = new utilities.mergeutils();
-
-				sortutility.preparesort('sortme', this.outputarray[0], config.sortkeys, false);
+			sortutility.preparesort('sortme', this.outputarray[0], config.sortkeys, false);
 				
-				this.outputarray = sortutility.sortset(this.outputarray);
+			this.outputarray = sortutility.sortset(this.outputarray);
 				
-			}
-
-			if (config.filename == null) {
-				console.info("Extracted " + this.outputarray.length + " records");
-			}
-			else {
-
-				// write out to a file
-
-				JSONutils.putJSON("./" + config.filename, this.outputarray);
-
-				console.info("Extracted " + this.outputarray.length + " records");
-
-			}
-
-			var rsssource = new RSS.RSSsource();
-			rsssource.sourceiconclass = '';
-			rsssource.sourcetitle = '';
-			rsssource.title = '';
-
-			self.send(moduleinstance, providerid, rsssource, feedidx);
-			self.done();
 		}
+
+		if (config.filename == null) {
+			console.info("Extracted " + this.outputarray.length + " records");
+		}
+		else {
+
+			// write out to a file
+
+			JSONutils.putJSON("./" + config.filename, this.outputarray);
+
+			console.info("Extracted " + this.outputarray.length + " records");
+
+		}
+
+		var rsssource = new RSS.RSSsource();
+		rsssource.sourceiconclass = '';
+		rsssource.sourcetitle = '';
+		rsssource.title = '';
+
+		self.send(moduleinstance, providerid, rsssource, feedidx);
+		self.done();
 
 	},
 
@@ -726,23 +608,6 @@ module.exports = NodeHelper.create({
 		}
 
 	},
-
-	checkendofpagination: function (config, currentitem) {
-
-		//checks that the criteria presented has or has not been met
-		//if not criteria is present then stop when the count = total
-
-		//pagcriteria: '%count%==%total%',
-
-		//1st replace all the variables with the actual values
-
-		var tempcriteria = this.replacevariables(config.pagcriteria,config.fields,null,config.pagdetails);
-
-		var result = eval(tempcriteria);
-
-		return result;
-    },
-
 
 	replacevariables: function (conditionstring,fields,itemdata,pagdetails) {
 

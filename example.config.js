@@ -1,11 +1,9 @@
 {
-    module: "MMM-Provider-JSON",
+    module: "MMM-Provider-SOAP",
     config: {
-        consumerids: ["arrivalsBOS",], //mandatory ID of the consumer receiving the data from the module
-        id: 'FlightArrivalsBOS', //mandatory unique ID
+        consumerids: ["BRDepReading",], //mandatory ID of the consumer receiving the data from the module
+            id: 'provBRDepReading', //mandatory unique ID
             package: 'BritishRailDeparturesReading', //name of the package that contains a standard set of config details
-        urlparams: { apikey: 'enter your api key here', airportcode: 'BOS' }, //parameters that are embedded into the baseURL, such as an api key and the airport of interest (Heathrow)
         filename: 'BritishRailDeparturesReading.json', //the name of an output file containing the details sent to the consumer for debug usage etc
-
 },
 

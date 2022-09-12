@@ -48,7 +48,7 @@ module: "MMM-Provider-SOAP",
 },
 ```
 
-Check out the example.config.js file for an example of a config that will produce an input of trains departing from a specific station for the MMM-Consumer-????? module
+Check out the example.config.js file for an example of a config that will produce an output of trains departing from a specific station for the MMM-Consumer-????? module
 
 ### Configuration Options
 
