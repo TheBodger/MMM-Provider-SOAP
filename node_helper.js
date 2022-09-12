@@ -1,4 +1,4 @@
-/* global Module, MMM-Provider-JSON */
+/* global Module, MMM-Provider-SOAP */
 
 /* Magic Mirror
  * Module: node_helper
@@ -9,7 +9,7 @@
 
 const moduleruntime = new Date();
 
-//this loads and formats JSON feeds from a specified source into extended NDTF items, depending on its config when called to from the main module
+//this loads and formats SOAP feeds from a specified source into JSON format, depending on its config when called to from the main module
 
 //TODO
 
