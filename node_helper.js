@@ -90,7 +90,7 @@ module.exports = NodeHelper.create({
 
 		//deepcopy config
 
-		var tempconfig = SOAP.parse(SOAP.stringify(config));
+		var tempconfig = JSON.parse(JSON.stringify(config));
 
 		// add a package if requested and specified
 
@@ -104,7 +104,7 @@ module.exports = NodeHelper.create({
 			catch (err) {
 				//failed so we report and continue
 
-				console.error("Reading package file:", tempconfig.package, ' returned error: ', SOAP.stringify(err));
+				console.error("Reading package file:", tempconfig.package, ' returned error: ', JSON.stringify(err));
 			}
 		}
 
@@ -135,7 +135,7 @@ module.exports = NodeHelper.create({
 			var fieldname = Object.keys(field)[0];
 			var fieldparams = field[fieldname];
 
-			if (this.debug) { console.log('Field details:' + SOAP.stringify(fieldparams)); }
+			if (this.debug) { console.log('Field details:' + JSON.stringify(fieldparams)); }
 
 			tempconfig.fields[index]['fieldname'] = fieldname;
 
@@ -235,7 +235,7 @@ module.exports = NodeHelper.create({
 
 		if (this.debug) {
 			this.logger[payload.moduleinstance].info(this.name + " NODE HELPER notification: " + notification + " - Payload: ");
-			this.logger[payload.moduleinstance].info(SOAP.stringify(payload));
+			this.logger[payload.moduleinstance].info(JSON.stringify(payload));
 		}
 
 		//we can receive these messages:
@@ -362,7 +362,7 @@ module.exports = NodeHelper.create({
 
 		if (this.debug) {
 			this.logger[moduleinstance].info("In send, source, feeds // sending items this time: " + (this.outputarray.length > 0));
-			this.logger[moduleinstance].info(SOAP.stringify(source));
+			this.logger[moduleinstance].info(JSON.stringify(source));
 		}
 
 		if (this.outputarray.length > 0) {
@@ -415,7 +415,7 @@ module.exports = NodeHelper.create({
 					if (field[field.fieldname].address != null) { dotaddress = field[field.fieldname].address + '.' + dotaddress; }
 
 					if (this.debug) {
-						console.log(SOAP.stringify(item) + '<<>>' + dotaddress);
+						console.log(JSON.stringify(item) + '<<>>' + dotaddress);
 					}
 
 					var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key
@@ -484,7 +484,7 @@ module.exports = NodeHelper.create({
 						}
 
 						if (this.debug) {
-							console.log('Second array >>>>' + SOAP.stringify(item) + '<<>>' + dotaddress);
+							console.log('Second array >>>>' + JSON.stringify(item) + '<<>>' + dotaddress);
 						}
 
 						var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key

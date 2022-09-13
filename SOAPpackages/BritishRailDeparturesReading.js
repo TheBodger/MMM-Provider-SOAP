@@ -19,7 +19,7 @@ var package =
 				</ns1:GetDepBoardWithDetailsRequest>
 			  </SOAP-ENV:Body>
 			</SOAP - ENV: Envelope > `,
-	baseheaders: ("Content-Type", "text/xml;charset=UTF-8", "SOAPAction", "http://thalesgroup.com/RTTI/2016-02-16/ldb/GetDepBoardWithDetails"),
+	baseheaders: ["Content-Type", "text/xml;charset=UTF-8", "SOAPAction", "http://thalesgroup.com/RTTI/2016-02-16/ldb/GetDepBoardWithDetails"],
 
 
 	fields: [//mandatory
