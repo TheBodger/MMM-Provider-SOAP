@@ -9,7 +9,7 @@
 
 const moduleruntime = new Date();
 
-//this loads and formats SOAP feeds from a specified source into JSON format, depending on its config when called to from the main module
+//this loads and formats SOAP feeds from a specified source into SOAP format, depending on its config when called to from the main module
 
 //TODO
 
@@ -40,7 +40,7 @@ var commonutils = require('../MMM-FeedUtilities/utilities');
 const structures = require("../MMM-ChartUtilities/structures");
 const utilities = require("../MMM-ChartUtilities/common");
 
-const JSONutils = new utilities.JSONutils();
+const SOAPutils = new utilities.SOAPutils();
 const configutils = new utilities.configutils();
 
 // local variables, held at provider level as this is a common module
@@ -90,7 +90,7 @@ module.exports = NodeHelper.create({
 
 		//deepcopy config
 
-		var tempconfig = JSON.parse(JSON.stringify(config));
+		var tempconfig = SOAP.parse(SOAP.stringify(config));
 
 		// add a package if requested and specified
 
@@ -104,7 +104,7 @@ module.exports = NodeHelper.create({
 			catch (err) {
 				//failed so we report and continue
 
-				console.error("Reading package file:", tempconfig.package, ' returned error: ', JSON.stringify(err));
+				console.error("Reading package file:", tempconfig.package, ' returned error: ', SOAP.stringify(err));
 			}
 		}
 
@@ -135,7 +135,7 @@ module.exports = NodeHelper.create({
 			var fieldname = Object.keys(field)[0];
 			var fieldparams = field[fieldname];
 
-			if (this.debug) { console.log('Field details:' + JSON.stringify(fieldparams)); }
+			if (this.debug) { console.log('Field details:' + SOAP.stringify(fieldparams)); }
 
 			tempconfig.fields[index]['fieldname'] = fieldname;
 
@@ -205,7 +205,7 @@ module.exports = NodeHelper.create({
 		// outputname is the name to use for the field in output, if not specified the fieldname is used
 		// sort indicates if this field should be included as a sort key, the sort order is always, key 1st and then any fields indicated as sort in the order they are entered in the fields array
 
-		//convert to keys for JSON Extraction
+		//convert to keys for SOAP Extraction
 
 		tempconfig.errorkey = 'error';
 		tempconfig.errorcode = 'code';
@@ -235,7 +235,7 @@ module.exports = NodeHelper.create({
 
 		if (this.debug) {
 			this.logger[payload.moduleinstance].info(this.name + " NODE HELPER notification: " + notification + " - Payload: ");
-			this.logger[payload.moduleinstance].info(JSON.stringify(payload));
+			this.logger[payload.moduleinstance].info(SOAP.stringify(payload));
 		}
 
 		//we can receive these messages:
@@ -281,15 +281,7 @@ module.exports = NodeHelper.create({
 		}
 
 
-
-		//add SOAP utilities here
-		//var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-		//var xhr = new XMLHttpRequest();
-		//xhr.open("POST", url);
-		//xhr.setRequestHeader("Content-Type", "text/xml;charset=UTF-8", "SOAPAction", "http://thalesgroup.com/RTTI/2016-02-16/ldb/GetDepBoardWithDetails")//, "Accept-encoding", "gzip,x-gzip,deflate,x-bzip2")
-		//xhr.send(data);
-
-		var JSONconfig = {
+		var SOAPconfig = {
 			options: options,
 			config: tempconfig,
 			feed: '',
@@ -298,38 +290,34 @@ module.exports = NodeHelper.create({
 			feedidx: 0,
 		};
 
-		JSONconfig['callback'] = function (JSONconfig, inputjson) {
+		SOAPconfig['SOAPerror'] = function (SOAPconfig, error) {
+			console.log("Error: occurred in SOAP call = " + error);
+		}
 
-			var jsonerror = utilities.getkeyedJSON(inputjson, JSONconfig.config.errorkey);
+		SOAPconfig['callback'] = function (SOAPconfig, inputSOAP) {
 
-			var jsonarray = utilities.getkeyedJSON(inputjson, JSONconfig.config.rootkey);
-
-			//check to see if we have an actual error to report
-
-			if (jsonerror != null) {
-				console.error(jsonerror[JSONconfig.config.errorcode], jsonerror[JSONconfig.config.errordescription]);
-			}
+			//var SOAParray = utilities.getkeyedSOAP(inputSOAP, SOAPconfig.config.rootkey);
 
 			//check it actually contains something, assuming if empty it is in error
-			if (jsonarray != null) {
-				if (jsonarray.length == 0) {
-					console.error("json array is empty");
+			if (SOAParray != null) {
+				if (SOAParray.length == 0) {
+					console.error("SOAP array is empty");
 					return null;
 				}
 			}
 			else {
-				console.error("json array is empty");
+				console.error("SOAP array is empty");
 				return null;
 			}
 
 			self.queue.addtoqueue(function () {
-				self.processfeed(JSONconfig.feed, JSONconfig.moduleinstance, JSONconfig.providerid, ++JSONconfig.feedidx, jsonarray);
+				self.processfeed(SOAPconfig.feed, SOAPconfig.moduleinstance, SOAPconfig.providerid, ++SOAPconfig.feedidx, SOAParray);
 			});
 
-			self.queue.startqueue(providerstorage[JSONconfig.moduleinstance].config.waitforqueuetime); //the start function ignores a start once started
+			self.queue.startqueue(providerstorage[SOAPconfig.moduleinstance].config.waitforqueuetime); //the start function ignores a start once started
 		}
 
-		JSONutils.getJSONnew(JSONconfig);
+		SOAPutils.getSOAPnew(SOAPconfig);
 
 	},
 
@@ -374,7 +362,7 @@ module.exports = NodeHelper.create({
 
 		if (this.debug) {
 			this.logger[moduleinstance].info("In send, source, feeds // sending items this time: " + (this.outputarray.length > 0));
-			this.logger[moduleinstance].info(JSON.stringify(source));
+			this.logger[moduleinstance].info(SOAP.stringify(source));
 		}
 
 		if (this.outputarray.length > 0) {
@@ -391,17 +379,17 @@ module.exports = NodeHelper.create({
 
 	},
 
-	processfeed: function (feed, moduleinstance, providerid, feedidx, jsonarray) {
+	processfeed: function (feed, moduleinstance, providerid, feedidx, SOAParray) {
 
-		//we process the JSON  here / 1 dataset
+		//we process the SOAP  here / 1 dataset
 
-		//jsonarray contains an array of base address data, that may contain other arrays
+		//SOAParray contains an array of base address data, that may contain other arrays
 		//when it is processed, a secondary array can be defined by having a field name of name[]
 		//if this is found then a loop is instigated, assuming all fields with name[] are at the same level
 
 		//an output record needs to be built initially and then data added for each loop
 
-		//aJSONObject.SiteRep.DV.Location.Period[0].Rep[0].D
+		//aSOAPObject.SiteRep.DV.Location.Period[0].Rep[0].D
 
 		const config = providerstorage[moduleinstance].config;
 
@@ -411,9 +399,9 @@ module.exports = NodeHelper.create({
 
 		var maxfeeddate = new Date(0);
 
-		for (var idx = 0; idx < jsonarray.length; idx++) { //initial data array loop
+		for (var idx = 0; idx < SOAParray.length; idx++) { //initial data array loop
 
-			const item = jsonarray[idx];
+			const item = SOAParray[idx];
 
 			var processthisitem = true; //drop items not meeting any validation rules
 			var tempitem = { object: config.type };
@@ -427,10 +415,10 @@ module.exports = NodeHelper.create({
 					if (field[field.fieldname].address != null) { dotaddress = field[field.fieldname].address + '.' + dotaddress; }
 
 					if (this.debug) {
-						console.log(JSON.stringify(item) + '<<>>' + dotaddress);
+						console.log(SOAP.stringify(item) + '<<>>' + dotaddress);
 					}
 
-					var validatedfield = self.validateconvertfield(field, utilities.getkeyedJSON(item, dotaddress));//extract using a dotnotation key
+					var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key
 
 					if (this.debug) {
 						console.log('validated field: ' + validatedfield.valid + ' value:' + validatedfield.value);
@@ -487,8 +475,8 @@ module.exports = NodeHelper.create({
 							if (field[field.fieldname].address.substr(field[field.fieldname].address.length - 2) == '[]')
 							{
 
-								//dotaddress = config.fields.secondArrayAddress + ".[" + idx2 + "]" + '.' + field.fieldname //pseudo dot address in format array.idx.name to work with the get keyed json
-								dotaddress = config.fields.secondArrayAddress + "." + idx2 + '.' + field.fieldname //pseudo dot address in format array.idx.name to work with the get keyed json
+								//dotaddress = config.fields.secondArrayAddress + ".[" + idx2 + "]" + '.' + field.fieldname //pseudo dot address in format array.idx.name to work with the get keyed SOAP
+								dotaddress = config.fields.secondArrayAddress + "." + idx2 + '.' + field.fieldname //pseudo dot address in format array.idx.name to work with the get keyed SOAP
 								secondArrayField = true
 
 							}
@@ -496,10 +484,10 @@ module.exports = NodeHelper.create({
 						}
 
 						if (this.debug) {
-							console.log('Second array >>>>' + JSON.stringify(item) + '<<>>' + dotaddress);
+							console.log('Second array >>>>' + SOAP.stringify(item) + '<<>>' + dotaddress);
 						}
 
-						var validatedfield = self.validateconvertfield(field, utilities.getkeyedJSON(item, dotaddress));//extract using a dotnotation key
+						var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key
 
 						if (this.debug) {
 							if (!validatedfield.value == null) {
@@ -546,7 +534,7 @@ module.exports = NodeHelper.create({
 
 		if (config.sorting && this.outputarray.length > 0) { //carry out multi level sort
 
-			JSONutils.putJSON("./presort" + config.filename, this.outputarray);
+			SOAPutils.putSOAP("./presort" + config.filename, this.outputarray);
 
 			var sortutility = new utilities.mergeutils();
 
@@ -563,7 +551,7 @@ module.exports = NodeHelper.create({
 
 			// write out to a file
 
-			JSONutils.putJSON("./" + config.filename, this.outputarray);
+			SOAPutils.putSOAP("./" + config.filename, this.outputarray);
 
 			console.info("Extracted " + this.outputarray.length + " records");
 
