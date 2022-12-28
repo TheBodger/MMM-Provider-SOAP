@@ -57,7 +57,7 @@ Module.register("MMM-Provider-SOAP", {
 		itemtype: 'array',	// how the items to process are arranged within the input
 							// if array, then each item is accessed via an index
 							// if object, then each item is accessed via some other method to be determined
-		package:'',
+		package:'',			// a package name from the SOAPpackages subfolder, that contains overides for any of these variables, usually used for complex requests (see example for BR)
 		fields: [],			// an array of field definitions 
 							// field definitions are in the format of (|entry is optional|)
 							// {fieldname:{|address:'dotnotation from the base'|,|inputtype:fieldtype|,|outputtype:fieldtype|,|key:true|,outputname:''|,|sort:true|}}
