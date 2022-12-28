@@ -77,16 +77,17 @@ Check out the example.config.js file for an example of a config that will produc
 		fieldname is  the  fieldname of the input field in the input data.
 		address is optional, if not specified then the data is extracted from the base address level.  
 		If suffixed by [] then it there is a secondary array of values of 0 or more entries. A record will be produced by looping through the secondary array and adding any non array fields from the main array. See the metoffice package for an example. 
-		Currently only 1 subsequent level is supported and all fields with an secondary array address must have the same address
-		
+		Currently only 1 subsequent level is supported and all fields with an secondary array address must have the same address. The secondary array must not be dot delimited in its name or address!!
 		!!These fields must come after none array fields, otherwise the data send to the consumer will be incomplete at best and corrupted at worst!!
-		fieldtype can be 'n', 's', 'b', 't'
+
+		fieldtype can be 'n', 's', 'b', 't','a'
 			n = numeric, the input is validated as numeric (converted to string if needed), the output is numeric 
 			s = string, the input is converted to string if not string for output
 			b = boolean, the input is converted to true/false for output
 			t = timestamp, the input is converted to a numeric unix format of time (equivalent of new Date(inputvalue).getTime()
 				timestamp can include a format to help the conversion of the input to the output (see examples)
-			d = time of day, in format hh:mm:ss or hh:mm - 24 hour clock, assumes UTC, any timezone adjustements should be made by the consuming module
+			d = time of day, in format hh:mm:ss or hh:mm - 24 hour clock, assumes UTC, any timezone adjustments should be made by the consuming module
+			a = array, each entry within the array that starts at base + name will be stringified and then added to the output, no validation is carried out, it can only be input type, outputtype of "a" will be ignored
 		key indicates that this field should be used for the subject entry within the output, if not specified then the first entry is the key, the key is the highest level to use if the data is sorted
 		outputname is the name to use for the field in output, if not specified the fieldname is used
 		sort indicates if this field should be included as a sort key, the sort order is always, key 1st and then any fields indicated as sort in the order they are entered in the fields array

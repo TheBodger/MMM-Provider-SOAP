@@ -33,7 +33,6 @@ var fs = require('fs');
 var LOG = require('../MMM-FeedUtilities/LOG');
 var QUEUE = require('../MMM-FeedUtilities/queueidea');
 var RSS = require('../MMM-FeedUtilities/RSS');
-var commonutils = require('../MMM-FeedUtilities/utilities');
 
 // get required structures and utilities
 
@@ -41,7 +40,7 @@ const structures = require("../MMM-ChartUtilities/structures");
 const utilities = require("../MMM-ChartUtilities/common");
 
 const SOAPutils = new utilities.SOAPutils();
-const configutils = new utilities.configutils();
+const JSONutils = new utilities.JSONutils();
 
 // local variables, held at provider level as this is a common module
 
@@ -121,7 +120,6 @@ module.exports = NodeHelper.create({
 		//if inputtype not set make it 's'
 
 		//if address is[] then set secondaryArray = true
-
 		tempconfig.fields['secondaryArray'] = false
 
 		var keyfound = false;
@@ -160,9 +158,9 @@ module.exports = NodeHelper.create({
 					console.log('>>' + fieldparams.address + "<>" + tempconfig.fields['secondaryArray'] + "<>" + fieldparams.address.substr(fieldparams.address.length - 2));
 				}
 
-				if (fieldparams.address.substr(fieldparams.address.length-2) == '[]') {
+				if (fieldparams.address.substr(fieldparams.address.length - 2) == '[]') {
 					tempconfig.fields['secondaryArray'] = true
-					tempconfig.fields['secondArrayAddress'] = fieldparams.address.substr(0,fieldparams.address.length - 2)
+					tempconfig.fields['secondArrayAddress'] = fieldparams.address.substr(0, fieldparams.address.length - 2)
 				}
 			}
 
@@ -211,7 +209,7 @@ module.exports = NodeHelper.create({
 		tempconfig.errorcode = 'code';
 		tempconfig.errordescription = 'info';
 
-		tempconfig.rootkey = tempconfig.baseaddress;
+		//tempconfig.rootkey = tempconfig.baseaddress;
 
 		this.outputarray = [];
 
@@ -291,12 +289,12 @@ module.exports = NodeHelper.create({
 		};
 
 		SOAPconfig['SOAPerror'] = function (SOAPconfig, error) {
-			console.log("Error: occurred in SOAP call = " + error);
+			if (error != null) { console.error("Error: occurred in SOAP call = " + error); }
 		}
 
 		SOAPconfig['callback'] = function (SOAPconfig, inputSOAP) {
 
-			//var SOAParray = utilities.getkeyedSOAP(inputSOAP, SOAPconfig.config.rootkey);
+			var SOAParray = utilities.getkeyedJSON(inputSOAP, SOAPconfig.config.rootkey);
 
 			//check it actually contains something, assuming if empty it is in error
 			if (SOAParray != null) {
@@ -379,6 +377,31 @@ module.exports = NodeHelper.create({
 
 	},
 
+	dot2json: function (dotAddress) {
+
+		//create a valid address for a json object from a dot address
+
+		//item[dot2json(config.fields.secondArrayAddress)]
+
+		var jsonAddress = '';
+
+		const regex = /\./gi;
+
+		jsonAddress = dotAddress.replace(regex, '"."');
+		jsonAddress = jsonAddress.replace(regex, '.[');
+		jsonAddress = jsonAddress.replace(regex, ']');
+
+		jsonAddress = '["' + jsonAddress + '"]'
+
+		return jsonAddress;
+
+	},
+
+	myEval: function (baseitem, obj) {
+		item = baseitem;
+		return eval(obj);
+	},
+
 	processfeed: function (feed, moduleinstance, providerid, feedidx, SOAParray) {
 
 		//we process the SOAP  here / 1 dataset
@@ -412,13 +435,13 @@ module.exports = NodeHelper.create({
 
 					var dotaddress = field.fieldname;
 
-					if (field[field.fieldname].address != null) { dotaddress = field[field.fieldname].address + '.' + dotaddress; }
+					if (field[field.fieldname].address != null) {dotaddress = field[field.fieldname].address + '.' + dotaddress;}
 
 					if (this.debug) {
 						console.log(JSON.stringify(item) + '<<>>' + dotaddress);
 					}
 
-					var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key
+					var validatedfield = self.validateconvertfield(field, utilities.getkeyedJSON(item, dotaddress));//extract using a dotnotation key
 
 					if (this.debug) {
 						console.log('validated field: ' + validatedfield.valid + ' value:' + validatedfield.value);
@@ -454,7 +477,7 @@ module.exports = NodeHelper.create({
 
 			else {
 
-				for (var idx2 = 0; idx2 < item[config.fields.secondArrayAddress].length; idx2++) { //secondary data array loop derived from the address
+				for (var idx2 = 0; idx2 < self.myEval(item,'item'+self.dot2json(config.fields.secondArrayAddress)).length; idx2++) { //secondary data array loop derived from the address
 
 					var tempitem = { object: config.type }; //should ensure a new item is created and data is correct when added to output, not replicated last item
 
@@ -487,7 +510,7 @@ module.exports = NodeHelper.create({
 							console.log('Second array >>>>' + JSON.stringify(item) + '<<>>' + dotaddress);
 						}
 
-						var validatedfield = self.validateconvertfield(field, utilities.getkeyedSOAP(item, dotaddress));//extract using a dotnotation key
+						var validatedfield = self.validateconvertfield(field, utilities.getkeyedJSON(item, dotaddress));//extract using a dotnotation key
 
 						if (this.debug) {
 							if (!validatedfield.value == null) {
@@ -534,7 +557,7 @@ module.exports = NodeHelper.create({
 
 		if (config.sorting && this.outputarray.length > 0) { //carry out multi level sort
 
-			SOAPutils.putSOAP("./presort" + config.filename, this.outputarray);
+			JSONutils.putJSON("./presort" + config.filename, this.outputarray);
 
 			var sortutility = new utilities.mergeutils();
 
@@ -551,7 +574,7 @@ module.exports = NodeHelper.create({
 
 			// write out to a file
 
-			SOAPutils.putSOAP("./" + config.filename, this.outputarray);
+			JSONutils.putJSON("./" + config.filename, this.outputarray);
 
 			console.info("Extracted " + this.outputarray.length + " records");
 
@@ -566,6 +589,7 @@ module.exports = NodeHelper.create({
 		self.done();
 
 	},
+
 
 	filterkeep: function (config, tempitem) {
 
@@ -680,7 +704,7 @@ module.exports = NodeHelper.create({
 
 	validateconvertfield: function (fieldconfig, value) {
 
-		// fieldtype can be 'n', 's', 'b', 't'
+		// fieldtype can be 'n', 's', 'b', 't', 'a'
 		// n = numeric, the input is validated as numeric (converted to string if needed), the output is numeric
 		// s = string, the input is converted to string if not string for output
 		// b = boolean, the input is converted to true/false for output
@@ -688,6 +712,8 @@ module.exports = NodeHelper.create({
 		//	timestamp can includes a format to help the conversion of the input to the output
 		//
 		// d = time of day, in format hh:mm:ss or hh:mm - 24 hour clock, assumes UTC, any timezone adjustments should be made by the consuming module
+		//
+		// a = array
 
 		var result = { valid: true, value: value };
 
@@ -746,6 +772,11 @@ module.exports = NodeHelper.create({
 				result.value = result.value.getTime();
 				return result;
 			}
+		}
+
+		if (fieldconfig.fieldtype == 'a') {
+			result.value = value;
+			return result;
 		}
 
 		result.valid = false;
