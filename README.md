@@ -98,7 +98,7 @@ Check out the example.config.js file for an example of a config that will produc
 
 ### Example configuration
 
-See example.config.js and the package BritishRailDeparturesReading.js in the packages folder for a configuration that will return train departure data for a station that is formatted to be relayed to MQTT through the MQRR relay consumer module
+See example.config.js and the package BritishRailDeparturesReading.js in the packages folder for a configuration that will return train departure data for a station that is formatted to be relayed to MQTT through the MQTT relay consumer module
 
 ### Additional Notes
 
