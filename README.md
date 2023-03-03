@@ -11,9 +11,8 @@ The module can obtain data from a URL
 3) Data can be sorted before being sent to the requesting consumer.
 
 ### Example
-![Example of MMM-Provider-SOAP output from British Rail being displayed through the MMM-Consumer-????? module](images/screenshot.png?raw=true "Example screenshot")
 
-Example of MMM-Provider-SOAP output being displayed through the MMM-Consumer-????? module
+See MMM-MQTTRelay for an example of sending the British Rail Data to a MW stream for consumption by an external client
 
 ### Dependencies
 
