@@ -14,7 +14,7 @@ The module can obtain data from a URL
 
 See MMM-MQTTRelay for an example of sending the British Rail Data to a MQ stream for consumption by an external client. 
 
-![Example of MMM-ModulePosition resizing modules](images/screenshot_edit.png?raw=true "Example screenshot")
+![Example of MMM-Provider-SOAP SOAP feed collector and provider](images/screenshot.png?raw=true "Example screenshot")
 
 Screen shot of MM-MQTTRelay passing BR data to MQ Stream.
 
