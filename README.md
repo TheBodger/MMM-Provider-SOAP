@@ -12,7 +12,7 @@ The module can obtain data from a URL
 
 ### Example
 
-See MMM-MQTTRelay for an example of sending the British Rail Data to a MW stream for consumption by an external client
+See MMM-MQTTRelay for an example of sending the British Rail Data to a MQ stream for consumption by an external client
 
 ### Dependencies
 
